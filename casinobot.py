@@ -234,6 +234,10 @@ def bet(bot, update, args):
 def start_round(bot, update):
     """Starts a new round"""
     global current_round
+    if current_round is not None:
+        bot.sendMessage(
+            update.message.chat_id, text='C\'è già un round attivo')
+        return
     limit = r.hget('config', 'payout_limit')
     if limit:
         limit = int(limit)
