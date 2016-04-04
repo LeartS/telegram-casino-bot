@@ -36,8 +36,9 @@ impossibile per me "barare" e creare estrazioni in base alle puntate.
 COME FUNZIONA:
 
 Per generare numeri casuali, uso un PRNG (Pseudo Random Number Generator),
-un algoritmo che dato un _seed_ iniziale genera una sequenza deterministica di
-numeri che possono essere considerati statisticamente casuali.
+un algoritmo che dato un <i>seed</i> iniziale genera una sequenza
+deterministica di numeri che possono essere considerati statisticamente
+casuali.
 Ciò che significa che con lo stesso seed verrà generata sempre la stessa
 sequenza, da qualsiasi programma che utilizzi lo stesso algoritmo con gli
 stessi parametri! Potete pure provare a copiare il seed
@@ -145,7 +146,7 @@ def chips(bot, update):
 @restrict
 @args(name, int)
 def buyin(bot, update, args):
-    name, amount = args
+    name, amount = args[:2]
     balance = r.hincrby('users:{}'.format(name), 'chips', amount)
     message = ('{} {} chips sono state aggiunte al tuo conto!\n'
                'Hai ora {} chips.').format(name, amount, balance)
@@ -302,8 +303,8 @@ def play(bot, update):
             r.hincrby(
                 'users:{}'.format(bet.player.name), 'chips', payout)
     if message == '':  # noone won!
-        message = 'Nessun vincitore a questo giro!'
-    message += '\n\nTotale in gioco: <b>{}</b>; totale vincite: <b>{}</b>'.format(
+        message = 'Nessun vincitore a questo giro!\n'
+    message += '\nTotale giocato: <b>{}</b>\nTotale vinto: <b>{}</b>'.format(
         total_bet, total_payout)
     message += '\nIl seed per il random utilizzato era: {}'.format(
         current_round.seed)
