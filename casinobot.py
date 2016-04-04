@@ -107,9 +107,7 @@ def args(*types):
 def get_game(key_or_code):
     try:
         return next(
-            filter(lambda g: g.key == key_or_code or g.code == key_or_code,
-                   games)
-            )
+            filter(lambda g: key_or_code.upper() in (g.key, g.code), games))
     except StopIteration:
         return None
 
