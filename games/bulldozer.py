@@ -7,10 +7,10 @@ class Bulldozer(BaseGame):
     short_description = 'Si lancia finchè non esce un numero a tua scelta'
     long_description = (
         'Si lancia finchè non esce un numero a vostra scelta (o si raggiungono'
-        ' i 12 lanci) e si vince un quinto di quanto puntato per ogni lancio'
+        ' i 12 lanci) e si vince un sesto di quanto puntato per ogni lancio'
         ' effettuato. Si vince sempre qualcosa!')
     has_param = True
-    min_bet = 50
+    min_bet = 60
 
     def check_param(self):
         return self.param in [1, 2, 3, 4, 5, 6]
@@ -23,11 +23,11 @@ class Bulldozer(BaseGame):
 
     @property
     def predicted_payout(self):
-        return 'Da {} a {}'.format(self.bet // 5, (self.bet * 12) // 5)
+        return 'Da {} a {}'.format(self.bet // 6, self.bet*2)
 
     @property
     def max_payout(self):
-        return int(self.bet * 12 / 5)
+        return int(self.bet * 2)
 
     def payout(self, draws):
         try:
@@ -36,4 +36,4 @@ class Bulldozer(BaseGame):
             # No selected number in the draws, this must mean the max number
             # of draws has been reached
             multiplier = 12
-        return int(self.bet * multiplier / 5)
+        return int(self.bet * multiplier / 6)
