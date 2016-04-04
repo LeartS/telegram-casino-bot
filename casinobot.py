@@ -119,8 +119,12 @@ def antiscam(bot, update):
 
 def chips(bot, update):
     chips = r.hget('users:{}'.format(update.message.from_user.name), 'chips')
-    message = '{} hai {} chips'.format(
-        update.message.from_user.name, chips.decode())
+    if not chips:
+        message = '{} non hai chips! Contatta @LeartS per fare buy-in'.format(
+            update.message.from_user.name)
+    else:
+        message = '{} hai {} chips'.format(
+            update.message.from_user.name, chips.decode())
     bot.sendMessage(update.message.chat_id, message)
 
 @restrict
