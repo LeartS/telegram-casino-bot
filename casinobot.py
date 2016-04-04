@@ -213,10 +213,10 @@ def list_games(bot, update, args):
 @args(name, int)
 def buyout(bot, update, args):
     name, amount = args
-    r.hincrby(
-        'users:{}'.format(update.message.from_user.name), 'chips', -amount)
-    message = '{} {} chips sono state tolte dal tuo conto'.format(
-        name, amount)
+    remaining = int(r.hincrby(
+        'users:{}'.format(update.message.from_user.name), 'chips', -amount))
+    message = ('{} {} chips sono state tolte dal tuo conto.\n'
+               'Ora hai {} chips.').format(name, amount, remaining)
     bot.sendMessage(update.message.chat_id, text=message)
     logger.info('{} buy-out {}'.format(name, amount))
 
