@@ -265,11 +265,11 @@ def bet(bot, update, args):
     message = '{} punti {} su {}. Possibile vincita: {}'.format(
         update.message.from_user.name, amount, game_variant,
         bet.predicted_payout)
-    message += '\nUsa /annulla per annullare.'.format(
-        player_bet_number)
+    message += '\nUsa /annulla per annullare.'
     bot.sendMessage(update.message.chat_id, text=message)
     logger.info('{} bets {} on {}'.format(
         update.message.from_user.name, amount, game_variant))
+
 
 @restrict_to_chat(casino_chat_id)
 def cancel(bot, update):
