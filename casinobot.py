@@ -66,7 +66,8 @@ prima di qualsiasi puntata) per generare i numeri casuali.
 def restrict(function):
     def wrapper(bot, update, args):
         if update.message.from_user.id not in admin_users:
-            bot.sendMessage(update.message.chat_id, text='Non fare il furbo ;)')
+            bot.sendMessage(
+                update.message.chat_id, text='Non fare il furbo ;)')
             return
         return function(bot, update, args)
     return wrapper
@@ -239,6 +240,10 @@ def bet(bot, update, args):
     if current_round is None:
         bot.sendMessage(update.message.chat_id, text='Nessun giro attivo!')
         return
+    elif current_round.status != 'open':
+        bot.sendMessage(update.message.chat_id,
+                        text='Usa /blocca per cambiare le puntate')
+        return
     amount, game_key_or_code = args[:2]
     game = get_game(game_key_or_code)
     if not game:
@@ -266,7 +271,9 @@ def bet(bot, update, args):
         update.message.from_user.name, amount, game_variant,
         bet.predicted_payout)
     message += '\nUsa /annulla per annullare.'
-    bot.sendMessage(update.message.chat_id, text=message)
+    message += '\nPayout <b>{}/{}</b>'.format(
+        current_round.total_round_payout, current_round.payout_limit)
+    bot.sendMessage(update.message.chat_id, text=message, parse_mode='html')
     logger.info('{} bets {} on {}'.format(
         update.message.from_user.name, amount, game_variant))
 
@@ -274,6 +281,13 @@ def bet(bot, update, args):
 @restrict_to_chat(casino_chat_id)
 def cancel(bot, update):
     current_round = get_current_round(update.message.chat_id)
+    if current_round is None:
+        bot.sendMessage(update.message.chat_id, text='Nessun round attivo')
+        return
+    elif current_round.status == 'closing':
+        bot.sendMessage(update.message.chat_id,
+                        text='Usa /blocca per cambiare le puntate')
+        return
     b = current_round.cancel_last_bet(update.message.from_user)
     if b is None:
         bot.sendMessage(update.message.chat_id,
@@ -317,6 +331,35 @@ def play(bot, update):
             update.message.chat_id,
             text='Aspetta! Nessuno ha ancora puntato in questo round!')
         return
+    current_round.status = 'closing'
+    j.put(lambda b: play_round(b, update), 10, repeat=False)
+    message = ('Stop alle puntate, estrazione in 10 secondi, '
+               '/blocca per bloccare.\n')
+    message += 'Puntate:\n' + '\n'.join(str(b) for b in current_round.bets)
+    message += '\n\nPayout <b>{}/{}</b> - antitruffa: <b>{}</b>\n'.format(
+        current_round.total_round_payout, current_round.payout_limit,
+        current_round.proof)
+    bot.sendMessage(update.message.chat_id, text=message, parse_mode='html')
+
+
+@restrict_to_chat(casino_chat_id)
+def block(bot, update):
+    current_round = get_current_round(update.message.chat_id)
+    if current_round is None or current_round.status != 'closing':
+        bot.sendMessage(
+            update.message.chat_id,
+            text='Non c\'è nessun giro che sta per essere estratto')
+        return
+    if not j.queue.empty():
+        j.queue.get()  # remove from queue
+        current_round.status = 'open'
+        bot.sendMessage(
+            update.message.chat_id,
+            text='Estrazione bloccata. Sistemare le puntate e ridare /gioca')
+
+
+def play_round(bot, update):
+    current_round = get_current_round(update.message.chat_id)
     draws = current_round.go()
     message = '\n'.join(
         'Lancio #{}: esce <b>{}</b>!'.format(i+1, d)
@@ -340,6 +383,7 @@ def play(bot, update):
         total_bet, total_payout)
     message += '\nIl seed per il random utilizzato era: {}'.format(
         current_round.seed)
+    current_round.status = 'closed'
     j.put(
         lambda b: b.sendMessage(update.message.chat_id, text=message,
                                 parse_mode='html'),
@@ -366,6 +410,7 @@ if __name__ == '__main__':
     dispatcher.addTelegramCommandHandler('lista', list_games)
     dispatcher.addTelegramCommandHandler('giro', start_round)
     dispatcher.addTelegramCommandHandler('gioca', play)
+    dispatcher.addTelegramCommandHandler('blocca', block)
     dispatcher.addTelegramCommandHandler('antitruffa', antiscam)
     dispatcher.addErrorHandler(error)
     updater.start_polling()

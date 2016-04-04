@@ -28,6 +28,7 @@ class Round(object):
         self.bets = []
         self.draws = []
         self.payout_limit = payout_limit
+        self.status = 'open'
 
     @property
     def total_round_payout(self):
