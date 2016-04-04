@@ -1,6 +1,5 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
-__package__ = 'casinobot'
 
 import logging
 import redis
@@ -9,6 +8,9 @@ from telegram.ext import Updater
 from game import InvalidGameParams
 from round import Round, UnacceptableBetError
 from games import games
+
+
+__package__ = 'casinobot'
 
 TOKEN = '173695676:AAF25jZo_Q13Zyi66upxtYuzefuJ4QT4Q-Y'
 
@@ -22,7 +24,7 @@ admin_users = [
 r = redis.StrictRedis(host='localhost', port=6379)
 j = None
 
-current_round = None
+active_rounds = {}
 
 
 antiscam_text = """
@@ -58,6 +60,7 @@ che combaciano e che quindi ho effettivamente utilizzato quel seed (stabilito
 prima di qualsiasi puntata) per generare i numeri casuali.
 """.replace('\n', ' ').replace('   ', '\n\n').replace('  ', '\n')
 
+
 def restrict(function):
     def wrapper(bot, update, args):
         if update.message.from_user.id not in admin_users:
@@ -66,11 +69,13 @@ def restrict(function):
         return function(bot, update, args)
     return wrapper
 
+
 def name(value):
     """Fake type that raises ValueError if value does not start with @"""
     if not str(value).startswith('@'):
         raise ValueError
     return str(value)
+
 
 def args(*types):
     """
@@ -104,6 +109,7 @@ def args(*types):
         return checked_args_f
     return check_args
 
+
 def get_game(key_or_code):
     try:
         return next(
@@ -111,9 +117,19 @@ def get_game(key_or_code):
     except StopIteration:
         return None
 
+
+def get_current_round(chat_id):
+    return active_rounds.get(chat_id, None)
+
+
+def set_current_round(chat_id, round_):
+    active_rounds[chat_id] = round_
+
+
 def antiscam(bot, update):
     bot.sendMessage(
         update.message.chat_id, text=antiscam_text, parse_mode='html')
+
 
 def chips(bot, update):
     chips = r.hget('users:{}'.format(update.message.from_user.name), 'chips')
@@ -125,15 +141,17 @@ def chips(bot, update):
             update.message.from_user.name, chips.decode())
     bot.sendMessage(update.message.chat_id, message)
 
+
 @restrict
 @args(name, int)
 def buyin(bot, update, args):
     name, amount = args
     balance = r.hincrby('users:{}'.format(name), 'chips', amount)
     message = ('{} {} chips sono state aggiunte al tuo conto!\n'
-           'Hai ora {} chips.').format(name, amount, balance)
+               'Hai ora {} chips.').format(name, amount, balance)
     bot.sendMessage(update.message.chat_id, text=message)
     logger.info('{} buy-in {}'.format(name, amount))
+
 
 @args(name, int)
 def transfer(bot, update, args):
@@ -153,6 +171,7 @@ def transfer(bot, update, args):
         update.message.from_user.name, amount, name)
     bot.sendMessage(update.message.chat_id, text=message)
 
+
 def info(bot, update, args):
     """
     Returns info about a game
@@ -163,12 +182,14 @@ def info(bot, update, args):
             game.code, game.long_description, game.min_bet)
         bot.sendMessage(update.message.chat_id, text=msg)
 
+
 def list_games(bot, update, args):
     msg = '\n'.join(
         '<b>[{}] {}</b>: {}'.format(g.key, g.code, g.short_description)
         for g in games
     )
     bot.sendMessage(update.message.chat_id, text=msg, parse_mode='html')
+
 
 @restrict
 @args(name, int)
@@ -178,8 +199,9 @@ def buyout(bot, update, args):
         'users:{}'.format(update.message.from_user.name), 'chips', -amount)
     message = '{} {} chips sono state tolte dal tuo conto'.format(
         name, amount)
-    bot.sendMessage(udpate.message.chat_id, text=message)
+    bot.sendMessage(update.message.chat_id, text=message)
     logger.info('{} buy-out {}'.format(name, amount))
+
 
 @restrict
 @args(int)
@@ -190,8 +212,10 @@ def limit(bot, update, args):
         update.message.chat_id,
         text='Impostato limite vincite round a {}'.format(amount))
 
+
 @args(int, str)
 def bet(bot, update, args):
+    current_round = get_current_round(update.message.chat_id)
     if current_round is None:
         bot.sendMessage(update.message.chat_id, text='Nessun giro attivo!')
         return
@@ -229,9 +253,10 @@ def bet(bot, update, args):
     logger.info('{} bets {} on {}'.format(
         update.message.from_user.name, amount, game_variant))
 
+
 def start_round(bot, update):
     """Starts a new round"""
-    global current_round
+    current_round = get_current_round(update.message.chat_id)
     if current_round is not None:
         bot.sendMessage(
             update.message.chat_id, text='C\'è già un round attivo')
@@ -241,19 +266,22 @@ def start_round(bot, update):
         limit = int(limit)
     else:
         limit = None
-    current_round = Round(payout_limit=limit)
+    new_round = Round(payout_limit=limit)
+    set_current_round(update.message.chat_id, new_round)
     message = ('Inizia un nuovo giro!\nMassimo payout: <b>{}</b> - '
-               'Codice antitruffa: <b>{}</b>').format(limit, current_round.proof)
+               'Codice antitruffa: <b>{}</b>').format(limit, new_round.proof)
     bot.sendMessage(update.message.chat_id, text=message, parse_mode='html')
+
 
 def play(bot, update):
     """Plays a round"""
-    global current_round
+    current_round = get_current_round(update.message.chat_id)
     if not current_round:
         bot.sendMessage(update.message.chat_id, text='Nessun giro attivo.')
     draws = current_round.go()
     message = '\n'.join(
-        'Lancio #{}: esce <b>{}</b>!'.format(i+1, d) for i, d in enumerate(draws))
+        'Lancio #{}: esce <b>{}</b>!'.format(i+1, d)
+        for i, d in enumerate(draws))
     bot.sendMessage(update.message.chat_id, text=message, parse_mode='html')
     # Winners
     message = ''
@@ -278,7 +306,8 @@ def play(bot, update):
                                 parse_mode='html'),
         1, repeat=False
     )
-    current_round = None
+    set_current_round(update.message.chat_id, None)
+
 
 def error(bot, update, args):
     logger.info('Error')
