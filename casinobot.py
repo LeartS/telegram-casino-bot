@@ -278,6 +278,12 @@ def play(bot, update):
     current_round = get_current_round(update.message.chat_id)
     if not current_round:
         bot.sendMessage(update.message.chat_id, text='Nessun giro attivo.')
+        return
+    if not current_round.bets:
+        bot.sendMessage(
+            update.message.chat_id,
+            text='Aspetta! Nessuno ha ancora puntato in questo round!')
+        return
     draws = current_round.go()
     message = '\n'.join(
         'Lancio #{}: esce <b>{}</b>!'.format(i+1, d)
