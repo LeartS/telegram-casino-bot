@@ -43,7 +43,7 @@ e usarlo per Python `random.seed()` sul vostro computer e otterrete anche lì
 la stessa sequenza!
 
 Per ogni giro genero un seed diverso e all'inizio di ogni giro,
-*prima di qualsiasi puntata*, mostro i primi 8 caratteri dell'hash MD5
+<b>prima di qualsiasi puntata</b>, mostro i primi 8 caratteri dell'hash MD5
 del seed che verrà utilizzato per le estrazioni.
 
 
@@ -115,7 +115,7 @@ def get_game(key_or_code):
 
 def antiscam(bot, update):
     bot.sendMessage(
-        update.message.chat_id, text=antiscam_text, parse_mode='markdown')
+        update.message.chat_id, text=antiscam_text, parse_mode='html')
 
 def chips(bot, update):
     chips = r.hget('users:{}'.format(update.message.from_user.name), 'chips')
@@ -167,10 +167,10 @@ def info(bot, update, args):
 
 def list_games(bot, update, args):
     msg = '\n'.join(
-        '*[{}] {}*: {}'.format(g.key, g.code, g.short_description)
+        '<b>[{}] {}</b>: {}'.format(g.key, g.code, g.short_description)
         for g in games
     )
-    bot.sendMessage(update.message.chat_id, text=msg, parse_mode='markdown')
+    bot.sendMessage(update.message.chat_id, text=msg, parse_mode='html')
 
 @restrict
 @args(name, int)
@@ -224,10 +224,10 @@ def bet(bot, update, args):
         update.message.from_user.name, amount, game_variant,
         bet.predicted_payout)
     message += '\n'.join(str(b) for b in current_round.bets)
-    message += '\n\npayout *{}/{}* - codice antitruffa: *{}*\n'.format(
+    message += '\n\npayout <b>{}/{}</b> - codice antitruffa: <b>{}</b>\n'.format(
         current_round.total_round_payout, current_round.payout_limit,
         current_round.proof)
-    bot.sendMessage(update.message.chat_id, text=message, parse_mode='markdown')
+    bot.sendMessage(update.message.chat_id, text=message, parse_mode='html')
     logger.info('{} bets {} on {}'.format(
         update.message.from_user.name, amount, game_variant))
 
@@ -244,9 +244,9 @@ def start_round(bot, update):
     else:
         limit = None
     current_round = Round(payout_limit=limit)
-    message = ('Inizia un nuovo giro!\nMassimo payout: *{}* - '
-               'Codice antitruffa: *{}*').format(limit, current_round.proof)
-    bot.sendMessage(update.message.chat_id, text=message, parse_mode='markdown')
+    message = ('Inizia un nuovo giro!\nMassimo payout: <b>{}</b> - '
+               'Codice antitruffa: <b>{}</b>').format(limit, current_round.proof)
+    bot.sendMessage(update.message.chat_id, text=message, parse_mode='html')
 
 def play(bot, update):
     """Plays a round"""
@@ -255,8 +255,8 @@ def play(bot, update):
         bot.sendMessage(update.message.chat_id, text='Nessun giro attivo.')
     draws = current_round.go()
     message = '\n'.join(
-        'Lancio #{}: esce *{}*!'.format(i+1, d) for i, d in enumerate(draws))
-    bot.sendMessage(update.message.chat_id, text=message, parse_mode='markdown')
+        'Lancio #{}: esce <b>{}</b>!'.format(i+1, d) for i, d in enumerate(draws))
+    bot.sendMessage(update.message.chat_id, text=message, parse_mode='html')
     # Winners
     message = ''
     total_bet = 0
@@ -271,13 +271,13 @@ def play(bot, update):
                 'users:{}'.format(bet.player.name), 'chips', payout)
     if message == '':  # noone won!
         message = 'Nessun vincitore a questo giro!'
-    message += '\n\nTotale in gioco: *{}*; totale vincite: *{}*'.format(
+    message += '\n\nTotale in gioco: <b>{}</b>; totale vincite: <b>{}</b>'.format(
         total_bet, total_payout)
     message += '\nIl seed per il random utilizzato era: {}'.format(
         current_round.seed)
     j.put(
         lambda b: b.sendMessage(update.message.chat_id, text=message,
-                                parse_mode='markdown'),
+                                parse_mode='html'),
         1, repeat=False
     )
     current_round = None
