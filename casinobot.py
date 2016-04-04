@@ -20,6 +20,7 @@ logger.setLevel(logging.DEBUG)
 admin_users = [
     8553438,  # LeartS
 ]
+casino_chat_id = -1001044483707
 
 r = redis.StrictRedis(host='localhost', port=6379)
 j = None
@@ -69,6 +70,19 @@ def restrict(function):
             return
         return function(bot, update, args)
     return wrapper
+
+
+def restrict_to_chat(chat_id):
+    def check_channel(func):
+        def wrapper(bot, update, *args):
+            if update.message.chat_id != chat_id:
+                bot.sendMessage(
+                    update.message.chat_id,
+                    text='Non puoi usare quel comando in questa chat.')
+                return
+            return func(bot, update, *args)
+        return wrapper
+    return check_channel
 
 
 def name(value):
@@ -144,6 +158,7 @@ def chips(bot, update):
 
 
 @restrict
+@restrict_to_chat(casino_chat_id)
 @args(name, int)
 def buyin(bot, update, args):
     name, amount = args[:2]
@@ -154,6 +169,7 @@ def buyin(bot, update, args):
     logger.info('{} buy-in {}'.format(name, amount))
 
 
+@restrict_to_chat(casino_chat_id)
 @args(name, int)
 def transfer(bot, update, args):
     """Transfer chips"""
@@ -193,6 +209,7 @@ def list_games(bot, update, args):
 
 
 @restrict
+@restrict_to_chat(casino_chat_id)
 @args(name, int)
 def buyout(bot, update, args):
     name, amount = args
@@ -205,6 +222,7 @@ def buyout(bot, update, args):
 
 
 @restrict
+@restrict_to_chat(casino_chat_id)
 @args(int)
 def limit(bot, update, args):
     amount = args[0]
@@ -214,6 +232,7 @@ def limit(bot, update, args):
         text='Impostato limite vincite round a {}'.format(amount))
 
 
+@restrict_to_chat(casino_chat_id)
 @args(int, str)
 def bet(bot, update, args):
     current_round = get_current_round(update.message.chat_id)
@@ -255,6 +274,7 @@ def bet(bot, update, args):
         update.message.from_user.name, amount, game_variant))
 
 
+@restrict_to_chat(casino_chat_id)
 def start_round(bot, update):
     """Starts a new round"""
     current_round = get_current_round(update.message.chat_id)
@@ -274,6 +294,7 @@ def start_round(bot, update):
     bot.sendMessage(update.message.chat_id, text=message, parse_mode='html')
 
 
+@restrict_to_chat(casino_chat_id)
 def play(bot, update):
     """Plays a round"""
     current_round = get_current_round(update.message.chat_id)
