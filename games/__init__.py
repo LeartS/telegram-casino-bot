@@ -9,6 +9,7 @@ from games.triple import Triple
 from games.increasing import Increasing
 from games.decreasing import Decreasing
 from games.devil import Devil
+from games.extremes import Extremes
 
 games = [
     Oneshot,
@@ -17,6 +18,7 @@ games = [
     Odd,
     Insurance,
     Double,
+    Extremes,
     Seven,
     Triple,
     Increasing,
