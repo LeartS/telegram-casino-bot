@@ -232,8 +232,8 @@ def limit(bot, update, args):
         text='Impostato limite vincite round a {}'.format(amount))
 
 
-@restrict_to_chat(casino_chat_id)
 @args(int, str)
+@restrict_to_chat(casino_chat_id)
 def bet(bot, update, args):
     current_round = get_current_round(update.message.chat_id)
     if current_round is None:
