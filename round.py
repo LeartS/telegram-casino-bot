@@ -40,6 +40,14 @@ class Round(object):
                 'Questa puntata mi porterebbe oltre il limite')
         self.bets.append(bet)
 
+    def cancel_last_bet(self, player):
+        bets = list(b for b in self.bets if b.player.name == player.name)
+        if len(bets) == 0:
+            return None
+        else:
+            self.bets.remove(bets[-1])
+            return bets[-1]
+
     def go(self):
         """Make alle the necessary draws"""
         i = 0  # failsafe to avoid infinite loop

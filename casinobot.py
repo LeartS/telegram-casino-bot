@@ -262,16 +262,27 @@ def bet(bot, update, args):
     r.hincrby(
         'users:{}'.format(update.message.from_user.name), 'chips', -amount)
     game_variant = bet.code + ' ' + str(param) if bet.has_param else bet.code
-    message = '{} punti {} su {}. Possibile vincita: {}\n\nIn gioco:\n'.format(
+    message = '{} punti {} su {}. Possibile vincita: {}'.format(
         update.message.from_user.name, amount, game_variant,
         bet.predicted_payout)
-    message += '\n'.join(str(b) for b in current_round.bets)
-    message += '\n\npayout <b>{}/{}</b> - codice antitruffa: <b>{}</b>\n'.format(
-        current_round.total_round_payout, current_round.payout_limit,
-        current_round.proof)
-    bot.sendMessage(update.message.chat_id, text=message, parse_mode='html')
+    message += '\nUsa /annulla per annullare.'.format(
+        player_bet_number)
+    bot.sendMessage(update.message.chat_id, text=message)
     logger.info('{} bets {} on {}'.format(
         update.message.from_user.name, amount, game_variant))
+
+@restrict_to_chat(casino_chat_id)
+def cancel(bot, update):
+    current_round = get_current_round(update.message.chat_id)
+    b = current_round.cancel_last_bet(update.message.from_user)
+    if b is None:
+        bot.sendMessage(update.message.chat_id,
+                        text='Non hai alcuna puntata da annullare')
+    else:
+        bot.sendMessage(
+            update.message.chat_id,
+            text='Annullata la tua puntata {} su {}.'.format(
+                b.bet, b.complete_game_name))
 
 
 @restrict_to_chat(casino_chat_id)
@@ -349,6 +360,7 @@ if __name__ == '__main__':
     dispatcher.addTelegramCommandHandler('trasferisci', transfer)
     dispatcher.addTelegramCommandHandler('chips', chips)
     dispatcher.addTelegramCommandHandler('punta', bet)
+    dispatcher.addTelegramCommandHandler('annulla', cancel)
     dispatcher.addTelegramCommandHandler('limita', limit)
     dispatcher.addTelegramCommandHandler('spiega', info)
     dispatcher.addTelegramCommandHandler('lista', list_games)
