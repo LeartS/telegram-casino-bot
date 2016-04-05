@@ -336,7 +336,7 @@ def play(bot, update):
             text='Estrazione già lanciata, usa /blocca per bloccare')
         return
     current_round.status = 'closing'
-    j.put(lambda b: play_round(b, update), 10, repeat=False)
+    j.put(lambda b: play_round(b, update, []), 10, repeat=False)
     message = ('Stop alle puntate, estrazione in 10 secondi, '
                '/blocca per bloccare.\n')
     message += 'Puntate:\n' + '\n'.join(str(b) for b in current_round.bets)
@@ -362,8 +362,15 @@ def block(bot, update):
             text='Estrazione bloccata. Sistemare le puntate e ridare /gioca')
 
 
-def play_round(bot, update):
+@restrict
+def force_play_round(bot, update, args):
+    play_round(bot, update, args)
+
+
+def play_round(bot, update, args):
     current_round = get_current_round(update.message.chat_id)
+    if current_round is None:
+        return
     draws = current_round.go()
     message = '\n'.join(
         'Lancio #{}: esce <b>{}</b>!'.format(i+1, d)
@@ -415,6 +422,7 @@ if __name__ == '__main__':
     dispatcher.addTelegramCommandHandler('giro', start_round)
     dispatcher.addTelegramCommandHandler('gioca', play)
     dispatcher.addTelegramCommandHandler('blocca', block)
+    dispatcher.addTelegramCommandHandler('forza', force_play_round)
     dispatcher.addTelegramCommandHandler('antitruffa', antiscam)
     dispatcher.addErrorHandler(error)
     updater.start_polling()
