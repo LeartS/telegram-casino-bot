@@ -26,7 +26,7 @@ class BaseGame(object):
         self.check_valid()
 
     def __str__(self):
-        return '{} ha puntato {} su {}. Possibile vincita: {}'.format(
+        return '{} punta {} su {}. Possibile vincita: {}'.format(
             self.player.name, self.bet, self.complete_game_name,
             self.predicted_payout)
 

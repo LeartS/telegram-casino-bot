@@ -331,6 +331,11 @@ def play(bot, update):
             update.message.chat_id,
             text='Aspetta! Nessuno ha ancora puntato in questo round!')
         return
+    if current_round.status == 'closing':
+        bot.sendMessage(
+            update.message.chat_id,
+            text='Estrazione già lanciata, usa /blocca per bloccare')
+        return
     current_round.status = 'closing'
     j.put(lambda b: play_round(b, update), 10, repeat=False)
     message = ('Stop alle puntate, estrazione in 10 secondi, '
