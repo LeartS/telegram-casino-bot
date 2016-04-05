@@ -26,6 +26,7 @@ class Round(object):
         random.seed(self.seed)
         self.random_state = random.getstate()
         self.bets = []
+        self.to_confirm_bets = []
         self.draws = []
         self.payout_limit = payout_limit
         self.status = 'open'
@@ -40,6 +41,7 @@ class Round(object):
             raise UnacceptableBetError(
                 'Questa puntata mi porterebbe oltre il limite')
         self.bets.append(bet)
+        self.to_confirm_bets.append(bet)
 
     def cancel_last_bet(self, player):
         bets = list(b for b in self.bets if b.player.name == player.name)
