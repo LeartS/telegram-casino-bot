@@ -10,6 +10,7 @@ from games.increasing import Increasing
 from games.decreasing import Decreasing
 from games.devil import Devil
 from games.extremes import Extremes
+from games.guess import Guess
 
 games = [
     Oneshot,
@@ -24,4 +25,5 @@ games = [
     Increasing,
     Decreasing,
     Devil,
+    Guess,
 ]
