@@ -325,7 +325,7 @@ class DealerBot(telegram.Bot):
 
 
 if __name__ == '__main__':
-    casinobot = DealerBot(TOKEN, ADMIN_USERS, None)
+    casinobot = DealerBot(TOKEN, ADMIN_USERS, CASINO_CHAT_ID)
     updater = Updater(bot=casinobot)
     j = updater.job_queue
     dispatcher = updater.dispatcher
