@@ -128,9 +128,6 @@ def limit(bot, update, args):
     return 'Impostato limite vincite round a {}'.format(amount)
 
 
-
-
-
 @decorators.command_handler
 @decorators.args(int, str)
 @decorators.restrict_to_chat
@@ -294,6 +291,11 @@ def play_round(bot, update, args):
     return message
 
 
+@decorators.command_handler
+def news(bot, update, args):
+    return strings.news
+
+
 class DealerBot(telegram.Bot):
 
     def __init__(self, token, admin_users, casino_channel=None):
@@ -333,6 +335,7 @@ if __name__ == '__main__':
     dispatcher.addTelegramCommandHandler('punta', bet)
     dispatcher.addTelegramCommandHandler('annulla', cancel)
     dispatcher.addTelegramCommandHandler('limita', limit)
+    dispatcher.addTelegramCommandHandler('news', news)
     dispatcher.addTelegramCommandHandler('spiega', info)
     dispatcher.addTelegramCommandHandler('lista', list_games)
     dispatcher.addTelegramCommandHandler('giro', start_round)
