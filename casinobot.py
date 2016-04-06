@@ -91,10 +91,10 @@ def info(bot, update, args):
     """
     Returns info about a game
     """
-    game = get_game(args[0])
+    game = get_game(args[0]) if args else None
     if not game:
         return "Su quale gioco vuoi avere informazioni?"
-    return "{} {}\n- Puntata minima: {}".format(
+    return "<b>{}</b>\n{}\n- Puntata minima: {}".format(
         game.code, game.long_description, game.min_bet)
 
 

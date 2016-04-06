@@ -7,7 +7,7 @@ class Decreasing(BaseGame):
     short_description = 'Vinci se esce una sequenza decrescente. x8'
     long_description = (
         'Si lanciano 3 dadi, se esce una sequenza strettamente decrescente'
-        ' (ovvero A > B > C), vinci 8 volte quello che hai puntato')
+        ' (ovvero A &gt; B &gt; C), vinci 8 volte quello che hai puntato')
     multiplier = 8
     min_bet = 5
 
