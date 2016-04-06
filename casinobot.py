@@ -283,7 +283,8 @@ def play_round(bot, update, args):
             r.hincrby(
                 'users:{}'.format(bet.player.name), 'chips', payout)
     if total_payout == 0:  # noone won!
-        message += 'Nessun vincitore a questo giro!\n'
+        message += 'Nessun vincitore a questo giro! {}\n'.format(
+            telegram.Emoji.SEE_NO_EVIL_MONKEY)
     message += '\nTotale giocato: <b>{}</b>\nTotale vinto: <b>{}</b>'.format(
         total_bet, total_payout)
     message += '\nIl seed per il random era: {}'.format(current_round.seed)

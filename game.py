@@ -1,3 +1,6 @@
+import telegram
+
+
 class InvalidGameParams(Exception):
 
     def __init__(self, message):
@@ -107,7 +110,8 @@ class BaseGame(object):
         who won and how much; but it can be customized in child classes and
         can also depend on the draws.
         """
-        return '{}! {} vince {} chips!'.format(
+        return '{} {}! {} vince {} chips!'.format(
+            telegram.Emoji.PARTY_POPPER,
             self.complete_game_name, self.player.name, self.payout(draws))
 
 
