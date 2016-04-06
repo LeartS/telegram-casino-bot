@@ -68,11 +68,12 @@ def buyin(bot, update, args):
     return message
 
 
+@decorators.command_handler
 @decorators.restrict_to_chat
 @decorators.args(name, int)
 def transfer(bot, update, args):
     """Transfer chips"""
-    name, amount = args
+    name, amount = args[:2]
     chips = int(
         r.hget('users:{}'.format(update.message.from_user.name), 'chips') or 0)
     if amount > chips:
