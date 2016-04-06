@@ -11,13 +11,19 @@ from games.decreasing import Decreasing
 from games.devil import Devil
 from games.extremes import Extremes
 from games.guess import Guess
+from games.first import First
+from games.middle import Middle
+from games.last import Last
 
 games = [
     Oneshot,
-    Bulldozer,
     Even,
     Odd,
+    First,
+    Middle,
+    Last,
     Insurance,
+    Bulldozer,
     Double,
     Extremes,
     Seven,
