@@ -25,16 +25,22 @@ PERCHÈ MD5
 
 Se mostrassi direttamente il seed, come detto, potreste barare voi usandolo
 sul vostro computer per sapere in anticipo quali numeri verranno generati.
-Con MD5 invece non potete risalire al seed originale (per cui non potete barare)
-ma quando vi do il seed originale (alla fine dell'estrazione) potete facilmente
-verificare, anche usando generatori MD5 online come http://www.md5.cz/,
-che combaciano e che quindi ho effettivamente utilizzato quel seed (stabilito
-prima di qualsiasi puntata) per generare i numeri casuali.
+Con MD5 invece non potete risalire al seed originale (per cui non potete
+barare) ma quando vi do il seed originale (alla fine dell'estrazione) potete
+facilmente verificare, anche usando generatori MD5 online
+come http://www.md5.cz/, che combaciano e che quindi ho effettivamente
+utilizzato quel seed (stabilito prima di qualsiasi puntata) per generare i
+numeri casuali.
 """.replace('\n', ' ').replace('   ', '\n\n').replace('  ', '\n')
 
 
 news = """
-<b>2016-04-09:</b>
+<b>2016-04-07:</b>
+
+- Fix di /spiega GUESS e alcuni piccoli cambiamenti/fix a vari messaggi
+
+
+<b>2016-04-06:</b>
 
 - Tre nuovi giochi: FIRST, MIDDLE e LAST. Rispettivamente vinci se escono i
 primi due numeri (1 o 2), i due in mezzo (3 o 4) o gli ultimi due (5 o 6).

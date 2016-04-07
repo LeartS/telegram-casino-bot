@@ -113,29 +113,3 @@ class BaseGame(object):
         return '{} {}! {} vince {} chips!'.format(
             telegram.Emoji.PARTY_POPPER,
             self.complete_game_name, self.player.name, self.payout(draws))
-
-
-
-"""
-**CHIUSO, STIAMO ASSUMENDO UN BOT!** Scegli una quota e /dai @LeartS la tua puntata
-
-QUOTE DADO:
-A: ONE SHOT Unico tiro risultato esatto: Paghi 1 vinci 5!
-B: EVEN/ODD Unico tiro pari o dispari. Paghi 5 vinci 9!
-C: INSURANCE Unico tiro perdi solo se esce 1. Paghi 7 vinci 8!
-D: DOUBLE Stesso numero in due lanci. Paghi 1 vinci 5!
-E: SEVEN Due lanci somma 7. Paghi 1 vinci 5!
-F: EXTREMES Due lanci solo 1 e/o 6. Paghi 1 vinci 7!
-G: TRIPLE Tre lanci stesso numero. Paghi 1 vinci 25!
-H: (DE)INCREASING Tre lanci con valori (de)crescenti. Paghi 1 vinci 8
-I: DIAVOLO Triplo 6: Paghi 1 vinci 50!
-J: JACKPOT! Quattro lanci tutti 1: paghi 1 vinci 150!
-K: SUICIDE! Si lancia finchè non esce un numero a vostra scelta e si vincono tante monete quanti i lanci effettuati (massimo 12)! Si paga 5 e si vince sempre, da 1 a 12 monete!
-L: DUELLO! 1 VS 1. Ognuno tira il sudo dado, chi fa il numero più alto vince tutto. Se si pareggia vince il banco. Si punta quanto si vuole (ma tutti la stessa cifra)
-M: AZZUFFATA! Minimo 3 giocatori. Il banco lancia il dado, dopodichè ognuno lancia il suo dado. Chi fa numero uguale a quello del banco vince tutto. Se nessuno lo fa, il banco si prende 3 monete e si rifa con quello che rimane. Si punta quanto si vuole (ma tutti la stessa cifra)
-
-QUOTE MOLLA:
-Z: VEGGENTE Minimo 3 giocatori. Si paga due per giocare e chi si avvicina più al numero vince tutto la posta in gioco meno due monete!
-
-Oppure quote personalizzate su richiesta!
-"""

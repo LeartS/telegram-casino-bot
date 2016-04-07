@@ -145,9 +145,8 @@ def bet(bot, update, args):
                 b.player.name, b.bet, b.complete_game_name,
                 b.predicted_payout)
         message += '\nUsare /annulla per annullare la propria ultima puntata'
-        message += '\nPossibile payout rimanente: <b>{}/{}</b>'.format(
-            current_round.payout_limit - current_round.total_round_payout,
-            current_round.payout_limit)
+        message += '\nPossibile payout rimanente: <b>{}</b>'.format(
+            current_round.payout_limit - current_round.total_round_payout)
         bot.reply(update, message)
 
     current_round = bot.get_current_round(update.message.chat_id)
@@ -252,7 +251,7 @@ def block(bot, update, args):
     if not j.queue.empty():
         j.queue.get()  # remove from queue
         current_round.status = 'open'
-        return 'Estrazione bloccata. Sistemare le puntate e ridare /gioca'
+        return 'Estrazione bloccata. Sistemare le puntate e ridare /estrai'
 
 
 @decorators.command_handler
