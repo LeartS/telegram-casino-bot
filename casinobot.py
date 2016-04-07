@@ -47,12 +47,16 @@ def antiscam(bot, update, args):
 
 @decorators.command_handler
 def chips(bot, update, args):
-    chips = r.hget('users:{}'.format(update.message.from_user.name), 'chips')
+    username = args[0] if args else update.message.from_user.name
+    chips = r.hget('users:{}'.format(username), 'chips')
     if not chips:
+        if len(args):
+            return '{} non ha chips!'
         return '{} non hai chips! Contatta @LeartS per fare buy-in'.format(
-            update.message.from_user.name)
-    return '{} hai {} chips'.format(
-        update.message.from_user.name, chips.decode())
+            username)
+    if len(args):
+        return '{} ha {} chips'.format(username, chips)
+    return '{} hai {} chips'.format(username, chips)
 
 
 @decorators.command_handler
