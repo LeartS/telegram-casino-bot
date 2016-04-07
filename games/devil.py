@@ -4,12 +4,12 @@ from game import BaseGame
 class Devil(BaseGame):
     key = 'V'
     code = 'DEVIL'
-    short_description = 'Vinci se esce 666. x100'
+    short_description = 'Vinci se esce 666. x135'
     long_description = (
-        'Si lanciano 3 dadi, se escono tre 6, vinci 100 volte quello che hai'
+        'Si lanciano 3 dadi, se escono tre 6, vinci 135 volte quello che hai'
         ' puntato')
-    multiplier = 100
-    min_bet = 1
+    multiplier = 135
+    min_bet = 5
 
     def must_draw(self, previous_draws):
         return len(previous_draws) < 3
