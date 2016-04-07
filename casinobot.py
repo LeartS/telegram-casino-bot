@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from datetime import date as date
 import logging
 import redis
 import telegram
@@ -21,7 +22,7 @@ TOKEN = '173695676:AAF25jZo_Q13Zyi66upxtYuzefuJ4QT4Q-Y'
 ADMIN_USERS = [8553438]
 CASINO_CHAT_ID = -1001044483707
 
-r = redis.StrictRedis(host='localhost', port=6379)
+r = redis.StrictRedis(host='localhost', port=6379, decode_responses=True)
 j = None
 
 
@@ -264,6 +265,67 @@ def force_play_round(bot, update, args):
     play_round(bot, update, args)
 
 
+def update_stats(bets, draws):
+
+    def get_bet_dict(b, payout, multiplier):
+        return {
+            'bet': b.bet,
+            'payout': payout,
+            'multiplier': multiplier,
+            'player': b.player.name,
+            'game': b.complete_game_name,
+        }
+
+    default_best = {'payout': -100, 'multiplier': 0}
+    default_worst = {'bet': 0, 'payout': 100000, 'multiplier': 1000}
+    best_bet = r.hgetall('betstats:best') or default_best
+    luckiest_bet = r.hgetall('betstats:luckiest') or default_best
+    worst_bet = r.hgetall('betstats:worst') or default_worst
+    unluckiest_bet = r.hgetall('betstats:unluckiest') or default_worst
+    total_bet = total_payout = 0
+    for bet in bets:
+        payout = bet.payout(draws)
+        multiplier = (payout / bet.bet) if payout else (bet.multiplier or 5)
+        total_bet += bet.bet
+        total_payout += payout
+        if payout > int(best_bet['payout']):
+            best_bet = get_bet_dict(bet, payout, multiplier)
+        if payout > 0 and multiplier > float(luckiest_bet['multiplier']):
+            luckiest_bet = get_bet_dict(bet, payout, multiplier)
+        if multiplier == float(luckiest_bet['multiplier']) and \
+           payout > int(luckiest_bet['payout']):
+            luckiest_bet = get_bet_dict(bet, payout, multiplier)
+        if payout <= int(worst_bet['payout']) and bet.bet > int(worst_bet['bet']):
+            worst_bet = get_bet_dict(bet, payout, multiplier)
+        if (payout == 0) and (
+                multiplier < float(unluckiest_bet['multiplier']) or (
+                    multiplier == float(unluckiest_bet['multiplier']) and
+                    bet.bet > int(unluckiest_bet['bet'])
+                )
+        ):
+            unluckiest_bet = get_bet_dict(bet, payout, multiplier)
+
+    if best_bet and best_bet != default_best:
+        r.hmset('betstats:best', best_bet)
+    if luckiest_bet and luckiest_bet != default_best:
+        r.hmset('betstats:luckiest', luckiest_bet)
+    if worst_bet and worst_bet != default_worst:
+        r.hmset('betstats:worst', worst_bet)
+    if unluckiest_bet and unluckiest_bet != default_worst:
+        r.hmset('betstats:unluckiest', unluckiest_bet)
+
+    r.hincrby(
+        'daystats:{}'.format(date.today().isoformat()),
+        'total_bet', total_bet)
+    r.hincrby(
+        'daystats:{}'.format(date.today().isoformat()),
+        'total_payout', total_payout)
+    r.hincrby('daystats:{}'.format(date.today().isoformat()), 'rounds', 1)
+    r.hincrby('allstats', 'total_bet', total_bet)
+    r.hincrby('allstats', 'total_payout', total_payout)
+    r.hincrby('allstats', 'rounds', 1)
+
+
 @decorators.command_handler
 def play_round(bot, update, args):
     current_round = bot.get_current_round(update.message.chat_id)
@@ -285,6 +347,7 @@ def play_round(bot, update, args):
             message += bet.winning_message(draws) + '\n'
             r.hincrby(
                 'users:{}'.format(bet.player.name), 'chips', payout)
+    update_stats(current_round.bets, draws)
     if total_payout == 0:  # noone won!
         message += 'Nessun vincitore a questo giro! {}\n'.format(
             telegram.Emoji.SEE_NO_EVIL_MONKEY)
@@ -298,6 +361,47 @@ def play_round(bot, update, args):
 @decorators.command_handler
 def news(bot, update, args):
     return strings.news
+
+
+@decorators.command_handler
+def stats(bot, update, args):
+
+    def str_bet(b):
+        if not b:
+            return 'nessuna puntata'
+        return '{} vince {} puntando {} su {}'.format(
+            b['player'], b['payout'], b['bet'], b['game'])
+
+    default = {
+        'rounds': 0,
+        'total_bet': 0,
+        'total_payout': 0,
+    }
+    daystats = r.hgetall('daystats:{}'.format(date.today().isoformat())) or default
+    allstats = r.hgetall('allstats') or default
+    best_bet = r.hgetall('betstats:best')
+    luckiest_bet = r.hgetall('betstats:luckiest')
+    worst_bet = r.hgetall('betstats:worst')
+    unluckiest_bet = r.hgetall('betstats:unluckiest')
+    message = (
+        '<b>Oggi:</b>\n'
+        '🍭 Numero giri: {0[rounds]}\n'
+        '💸 Totale giocato: {0[total_bet]}\n'
+        '💰 Totale vinto: {0[total_payout]}\n\n'
+        ''
+        '<b>Da quando iniziato a registrare:</b>\n'
+        '🍭 Numero giri: {1[rounds]}\n'
+        '💸 Totale puntato: {1[total_bet]}\n'
+        '💰 Totale vinto: {1[total_payout]}\n\n'
+        ''
+        '<b>Record puntate:</b>\n'
+        '😍 Migliore: {2}\n'
+        '🎯 Più fortunata: {3}\n'
+        '😭 Peggiore: {4}\n'
+        '😡 Più sfortunata: {5}\n\n'
+    ).format(daystats, allstats, str_bet(best_bet), str_bet(luckiest_bet),
+             str_bet(worst_bet), str_bet(unluckiest_bet))
+    return message
 
 
 class DealerBot(telegram.Bot):
@@ -340,6 +444,7 @@ if __name__ == '__main__':
     dispatcher.addTelegramCommandHandler('annulla', cancel)
     dispatcher.addTelegramCommandHandler('limita', limit)
     dispatcher.addTelegramCommandHandler('news', news)
+    dispatcher.addTelegramCommandHandler('stats', stats)
     dispatcher.addTelegramCommandHandler('spiega', info)
     dispatcher.addTelegramCommandHandler('lista', list_games)
     dispatcher.addTelegramCommandHandler('giro', start_round)
