@@ -253,7 +253,7 @@ def draw(bot, update, args):
     if not current_round.bets:
         return 'Aspetta! Nessuno ha ancora puntato in questo round!'
     if current_round.status == 'closing':
-        return 'Estrazione già lanciata, usa /blocca per bloccare'
+        return  # don't send useless message
     # remove bet confirmation send if any
     while not j.queue.empty():
         j.queue.get()
