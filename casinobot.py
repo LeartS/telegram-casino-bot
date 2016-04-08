@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from datetime import date as date
+import functools
 import logging
 import redis
 import telegram
@@ -89,6 +90,28 @@ def transfer(bot, update, args):
         'users:{}'.format(name), 'chips', amount)
     return '{} hai dato {} delle tue chips a {}. Che gentile!'.format(
         update.message.from_user.name, amount, name)
+
+
+@decorators.command_handler
+@decorators.restrict
+def balance(bot, update, args):
+    users = r.keys('users:*')
+    # build pipeline of all gets, much faster than sending each get alone
+    chips = functools.reduce(
+        lambda pipe, u: pipe.hget(u, 'chips'), users, r.pipeline()).execute()
+    total = 0
+    n_with_zero = 0
+    message = 'Lista utenti:\n'
+    for user, chips in sorted(zip(users, chips), key=lambda x: -int(x[1])):
+        if int(chips) == 0:
+            n_with_zero += 1
+            continue
+        message += '{} ha {} chips\n'.format(user.split(':')[1], chips)
+        total += int(chips)
+    if n_with_zero:
+        message += 'Più altri {} giocatori con 0 chips\n'.format(n_with_zero)
+    message += '\nTotale: <b>{} ({} monete)</b>'.format(total, total // 100)
+    return message
 
 
 @decorators.command_handler
@@ -440,6 +463,7 @@ if __name__ == '__main__':
     dispatcher.addTelegramCommandHandler('preleva', buyout)
     dispatcher.addTelegramCommandHandler('trasferisci', transfer)
     dispatcher.addTelegramCommandHandler('chips', chips)
+    dispatcher.addTelegramCommandHandler('bilancio', balance)
     dispatcher.addTelegramCommandHandler('punta', bet)
     dispatcher.addTelegramCommandHandler('annulla', cancel)
     dispatcher.addTelegramCommandHandler('limita', limit)
