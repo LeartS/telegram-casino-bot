@@ -37,6 +37,11 @@ numeri casuali.
 news = """
 <b>2016-04-07:</b>
 
+- Introduzione statistiche! Visualizzabili col comando /stats
+
+- Ora col comando /chips si possono visualizzare anche le chips di qualcun
+altro
+
 - Fix di /spiega GUESS e alcuni piccoli cambiamenti/fix a vari messaggi
 
 
