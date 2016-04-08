@@ -39,7 +39,10 @@ class Round(object):
     def add_bet(self, bet):
         if self.total_round_payout + bet.max_payout > self.payout_limit:
             raise UnacceptableBetError(
-                'Questa puntata mi porterebbe oltre il limite')
+                'Non posso accettare questa puntata, mi farebbe superare il '
+                'limite di payout (possibile vincita) di questo round.\n'
+                'Payout rimanente: <b>{}</b>'.format(
+                    self.payout_limit - self.total_round_payout))
         self.bets.append(bet)
         self.to_confirm_bets.append(bet)
 
