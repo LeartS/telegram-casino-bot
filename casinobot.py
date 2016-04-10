@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 TOKEN = '173695676:AAF25jZo_Q13Zyi66upxtYuzefuJ4QT4Q-Y'
-ADMIN_USERS = [8553438]
+ADMIN_USERS = [8553438, 93238420]
 CASINO_CHAT_ID = -1001044483707
 
 r = redis.StrictRedis(host='localhost', port=6379, decode_responses=True)
