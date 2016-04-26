@@ -53,7 +53,7 @@ def chips(bot, update, args):
     chips = r.hget('users:{}'.format(username), 'chips')
     if not chips:
         if len(args):
-            return '{} non ha chips!'
+            return '{} non ha chips!'.format(username)
         return '{} non hai chips! Contatta un gestore per fare buy-in'.format(
             username)
     if len(args):
