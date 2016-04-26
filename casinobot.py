@@ -54,7 +54,7 @@ def chips(bot, update, args):
     if not chips:
         if len(args):
             return '{} non ha chips!'
-        return '{} non hai chips! Contatta @LeartS per fare buy-in'.format(
+        return '{} non hai chips! Contatta un gestore per fare buy-in'.format(
             username)
     if len(args):
         return '{} ha {} chips'.format(username, chips)
