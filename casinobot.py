@@ -84,6 +84,8 @@ def transfer(bot, update, args):
         r.hget('users:{}'.format(update.message.from_user.name), 'chips') or 0)
     if amount > chips:
         return 'Non puoi trasferire chips che non hai ;)'
+    if amount <= 0:
+        return 'Dai, dona almeno una chip!'
     r.hincrby(
         'users:{}'.format(update.message.from_user.name), 'chips', -amount)
     r.hincrby(
