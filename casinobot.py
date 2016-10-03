@@ -19,7 +19,7 @@ __package__ = 'casinobot'
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-TOKEN = '173695676:AAF25jZo_Q13Zyi66upxtYuzefuJ4QT4Q-Y'
+TOKEN = '173695676:AAF25jZo_Q13Zyi66upxtYuzefuJ4QT4Q-Y'  # old revoked token
 ADMIN_USERS = [8553438, 93238420]
 CASINO_CHAT_ID = -1001044483707
 
